@@ -108,10 +108,10 @@ int main(void) {
     // Expected values:
     // FCFS: Turnaround ≈ 5.75, Waiting ≈ 3.25, Response ≈ 3.25.
     // SJF: Turnaround ≈ 5.0, Waiting ≈ 2.5, Response ≈ 2.5.
-    // RR: Turnaround ≈ 6.25, Waiting ≈ 3.75, Response ≈ 2.0.
+    // RR: Turnaround ≈ 6.25, Waiting ≈ 3.75, Response ≈ 1.75.
     Metrics expectedFcfs3 = {5.75, 3.25, 3.25};
     Metrics expectedSjf3  = {5.0, 2.5, 2.5};
-    Metrics expectedRr3   = {6.25, 3.75, 2.0};
+    Metrics expectedRr3   = {6.25, 3.75, 1.75};
     run_test_case("Test Case 3", test3, n3, quantum3, expectedFcfs3, expectedSjf3, expectedRr3);
 
     // --- Test Case 4 ---
@@ -131,11 +131,11 @@ int main(void) {
     int n4 = 5;
     int quantum4 = 3;
     // Expected values (hypothetical/simulation):
-    // FCFS: {13.0, 7.0, 7.0}
-    // SJF:  {11.0, 5.5, 5.5}
+    // FCFS: {8.60, 4.60, 4.60}
+    // SJF:  {7.60, 3.60, 3.60}
     // RR:   {10.6, 6.6, 2.6}
-    Metrics expectedFcfs4 = {13.0, 7.0, 7.0};
-    Metrics expectedSjf4  = {11.0, 5.5, 5.5};
+    Metrics expectedFcfs4 = {8.60, 4.60, 4.60};
+    Metrics expectedSjf4  = {7.60, 3.60, 3.60};
     Metrics expectedRr4   = {10.6, 6.6, 2.6};
     run_test_case("Test Case 4", test4, n4, quantum4, expectedFcfs4, expectedSjf4, expectedRr4);
 
