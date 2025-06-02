@@ -1,81 +1,14 @@
-# CPU Scheduling Algorithms
+برای هر الگوریتم، ابتدا یک کپی از آرایه پردازش‌های ورودی با استفاده از تابع copy_processes ایجاد می‌شود. این کار تضمین می‌کند که تغییرات در شبیه‌سازی روی داده‌های اصلی تست تأثیری نمی‌گذارند. در طول کپی، فیلدهای مهمی مانند remainingTime (برای RR) و startTime (که در ابتدا روی -1 تنظیم می‌شود تا مشخص شود پردازش هنوز شروع نشده است) مقداردهی اولیه می‌شوند.
 
-This project implements three fundamental CPU scheduling algorithms in C as part of an Operating Systems course project.
+برای مرتب‌سازی پردازش‌ها در سناریوهای مختلف، دو تابع مقایسه برای qsort تعریف شده است: compare_arrival که پردازش‌ها را بر اساس زمان ورود و سپس PID مرتب می‌کند، و compare_burst که برای SJF کاربرد دارد و پردازش‌ها را بر اساس زمان اجرای (Burst Time) و سپس زمان ورود مرتب می‌کند.
 
-## Algorithms Implemented
+الگوریتم FCFS
+در پیاده‌سازی FCFS، پردازش‌ها ابتدا با استفاده از qsort و تابع compare_arrival بر اساس زمان ورودشان مرتب می‌شوند. سپس، یک حلقه تکرار می‌شود که در هر گام، پردازش بعدی را از صف مرتب شده انتخاب می‌کند. currentTime به صورت متوالی پیش می‌رود و اگر CPU در لحظه ورود پردازش بعدی بیکار باشد، currentTime به arrivalTime آن پردازش جهش می‌کند. startTime پردازش برابر با currentTime در لحظه شروع اجرا تنظیم می‌شود و پس از اتمام burstTime پردازش، completionTime آن محاسبه شده و currentTime به‌روز می‌شود. معیارهای turnaround، waiting و response برای هر پردازش محاسبه و در نهایت میانگین آن‌ها بازگردانده می‌شود.
 
-1. **FCFS (First Come First Serve)**
-2. **SJF (Shortest Job First - Non-Preemptive)**
-3. **Round Robin (RR)**
+الگوریتم SJF
+در پیاده‌سازی SJF (غیرقابل پیش‌گیری)، یک حلقه اصلی تا زمانی که تمام پردازش‌ها تکمیل شوند، اجرا می‌شود. در هر گام زمانی، ابتدا یک ready_queue (صف آماده) از پردازش‌هایی که تا currentTime رسیده‌اند و هنوز تکمیل نشده‌اند، ایجاد می‌شود. اگر این صف خالی باشد، currentTime به زمان ورود نزدیک‌ترین پردازش آینده پرش می‌کند تا CPU از حالت بیکاری خارج شود. سپس، ready_queue با استفاده از qsort و تابع compare_burst بر اساس burstTime مرتب می‌شود و کوتاه‌ترین کار انتخاب می‌گردد. startTime آن برابر با currentTime فعلی تنظیم شده و پردازش به طور کامل اجرا می‌شود تا completionTime آن محاسبه گردد. currentTime نیز به completionTime پردازش فعلی به‌روز می‌شود و پردازش به عنوان تکمیل شده علامت‌گذاری می‌گردد. در نهایت، میانگین زمان‌های مربوطه محاسبه و برگردانده می‌شوند.
 
-Each algorithm computes the following performance metrics:
-- Average Turnaround Time
-- Average Waiting Time
-- Average Response Time
+الگوریتم Round Robin
+پیاده‌سازی Round Robin از یک صف پویا (که به صورت آرایه پیاده‌سازی شده است) برای مدیریت پردازش‌های آماده استفاده می‌کند. یک آرایه in_queue نیز برای جلوگیری از افزودن تکراری پردازش‌ها به صف به کار می‌رود. در ابتدا، تمام پردازش‌هایی که در زمان 0 وارد می‌شوند، به صف اضافه می‌شوند. حلقه اصلی شبیه‌سازی تا زمانی که تمام پردازش‌ها تکمیل شوند، ادامه می‌یابد.
 
-## File Structure
-
-```
-.
-├── scheduler.h         # Declarations for structs and scheduling functions
-├── scheduler.c         # Implementation of the scheduling algorithms
-├── scheduler_test.c    # Test cases and assertions for validating correctness
-├── Makefile            # Build automation script
-└── README.md           # Project documentation (this file)
-```
-
-## How to Compile
-
-To build the project, simply use:
-
-```bash
-make
-```
-
-This compiles the source files and produces an executable named `scheduler_test`.
-
-## How to Run
-
-To run the compiled test program:
-
-```bash
-make run
-```
-
-This will execute the scheduler tests and print the calculated vs. expected metrics for:
-- FCFS
-- SJF
-- Round Robin (with specified quantum)
-
-If all assertions pass, you will see:
-
-```
->>> Test Case X PASSED.
-...
-ALL TESTS PASSED.
-```
-
-## How to Clean
-
-To remove the compiled binary:
-
-```bash
-make clean
-```
-
-## Example Output (Truncated)
-
-```
-==== Test Case 1 ====
-FCFS: Calculated: Turnaround: 15.00, Waiting: 7.33, Response: 7.33
-      Expected:   Turnaround: 15.00, Waiting: 7.33, Response: 7.33
-SJF:  ...
-RR (Quantum = 4): ...
->>> Test Case 1 PASSED.
-```
-
-## Notes
-
-- The `Process` struct contains fields for tracking all timing metrics.
-- All algorithms are non-preemptive except RR which uses time slicing.
-- The project is written in standard C and should work on any Unix-like system (Linux, macOS, WSL).
+اگر صف آماده خالی باشد (CPU بیکار)، سیستم currentTime را به زمان ورود نزدیک‌ترین پردازش آینده (که هنوز اجرا نشده و در صف نیست) جهش می‌دهد و سپس تمام پردازش‌هایی که تا آن زمان رسیده‌اند، به صف اضافه می‌شوند. اگر صف خالی نباشد، پردازش از ابتدای صف برداشته می‌شود. startTime پردازش در اولین باری که اجرا می‌شود، برابر با currentTime تنظیم می‌گردد. پردازش به اندازه timeQuantum یا زمان باقی‌مانده‌اش اجرا می‌شود و currentTime به‌روز می‌شود. سپس، تمام پردازش‌های جدیدی که در طول اجرای این کوانتوم به سیستم رسیده‌اند، به انتهای صف اضافه می‌شوند. در نهایت، اگر پردازش فعلی هنوز remainingTime داشته باشد، دوباره به انتهای صف برگردانده می‌شود. اگر پردازش تکمیل شده باشد، completionTime آن ثبت شده و از لیست پردازش‌های فعال حذف می‌شود. در پایان شبیه‌سازی، میانگین زمان‌های Turnaround، Waiting و Response برای تمام پردازش‌ها محاسبه و بازگردانده می‌شود.
